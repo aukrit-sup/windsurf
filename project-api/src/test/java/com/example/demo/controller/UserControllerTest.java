@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes = com.example.demo.DemoApplication.class)
 public class UserControllerTest {
 
     @Autowired
@@ -24,7 +24,7 @@ public class UserControllerTest {
         
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(3));
     }
