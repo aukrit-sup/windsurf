@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import {
   Table,
   TableBody,
@@ -12,15 +13,31 @@ import {
   Avatar,
   Chip,
   Box,
-  Typography
+  Typography,
+  IconButton,
+  Button
 } from '@mui/material'
 import {
   Person as PersonIcon,
   Email as EmailIcon,
-  Badge as BadgeIcon
+  Badge as BadgeIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon
 } from '@mui/icons-material'
 
-const UserTable = ({ users, loading, error }) => {
+const UserTable = ({ users, loading, error, onEdit, onDelete }) => {
+  const handleDelete = async (userId) => {
+    if (window.confirm('คุณต้องการลบผู้ใช้นี้ใช่หรือไม่?')) {
+      try {
+        await axios.delete(`http://localhost:8080/api/users/${userId}`)
+        onDelete()
+      } catch (error) {
+        console.error('Error deleting user:', error)
+        alert('ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่')
+      }
+    }
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
@@ -128,6 +145,18 @@ const UserTable = ({ users, loading, error }) => {
             >
               สถานะ
             </TableCell>
+            <TableCell 
+              sx={{ 
+                fontWeight: 600, 
+                fontSize: '0.875rem',
+                color: 'text.primary',
+                borderBottom: '2px solid',
+                borderColor: 'divider'
+              }}
+              align="center"
+            >
+              จัดการ
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -215,6 +244,30 @@ const UserTable = ({ users, loading, error }) => {
                     fontSize: '0.75rem'
                   }}
                 />
+              </TableCell>
+              <TableCell align="center">
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                  <IconButton 
+                    size="small"
+                    onClick={() => onEdit(user)}
+                    sx={{ 
+                      color: 'primary.main',
+                      '&:hover': { bgcolor: 'primary.light', color: 'primary.dark' }
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton 
+                    size="small"
+                    onClick={() => handleDelete(user.id)}
+                    sx={{ 
+                      color: 'error.main',
+                      '&:hover': { bgcolor: 'error.light', color: 'error.dark' }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </TableCell>
             </TableRow>
           ))}

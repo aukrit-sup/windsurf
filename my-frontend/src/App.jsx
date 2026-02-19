@@ -10,9 +10,11 @@ import {
   Alert,
   ThemeProvider,
   createTheme,
-  CssBaseline
+  CssBaseline,
+  Stack
 } from '@mui/material'
 import UserTable from './components/UserTable'
+import UserForm from './components/UserForm'
 import './App.css'
 
 const theme = createTheme({
@@ -47,6 +49,8 @@ function App() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
 
   useEffect(() => {
     fetchUsers()
@@ -68,6 +72,29 @@ function App() {
 
   const handleRefresh = () => {
     fetchUsers()
+  }
+
+  const handleAdd = () => {
+    setEditingUser(null)
+    setFormOpen(true)
+  }
+
+  const handleEdit = (user) => {
+    setEditingUser(user)
+    setFormOpen(true)
+  }
+
+  const handleDelete = () => {
+    fetchUsers()
+  }
+
+  const handleSave = () => {
+    fetchUsers()
+  }
+
+  const handleCloseForm = () => {
+    setFormOpen(false)
+    setEditingUser(null)
   }
 
   return (
@@ -96,25 +123,45 @@ function App() {
             >
               แสดงรายชื่อผู้ใช้จากฐานข้อมูล
             </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                </svg>
-              }
-              onClick={handleRefresh}
-              sx={{ 
-                px: 4, 
-                py: 1.5,
-                textTransform: 'none',
-                fontSize: '1rem',
-                borderRadius: 2
-              }}
+            
+            {/* Action Buttons */}
+            <Stack 
+              direction={{ xs: 'column', sm: 'row' }} 
+              spacing={2} 
+              justifyContent="center"
+              sx={{ mb: 2 }}
             >
-              รีเฟรชข้อมูล
-            </Button>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleAdd}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  borderRadius: 2,
+                  minWidth: { xs: '100%', sm: 'auto' }
+                }}
+              >
+                เพิ่มผู้ใช้
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={handleRefresh}
+                sx={{ 
+                  px: 4, 
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  borderRadius: 2,
+                  minWidth: { xs: '100%', sm: 'auto' }
+                }}
+              >
+                รีเฟรชข้อมูล
+              </Button>
+            </Stack>
           </Box>
 
           {/* Main Content */}
@@ -140,9 +187,6 @@ function App() {
               </Typography>
               {users.length > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', color: 'success.main' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" sx={{ mr: 1 }}>
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     ข้อมูลล่าสุด
                   </Typography>
@@ -151,7 +195,13 @@ function App() {
             </Box>
 
             {/* Table Content */}
-            <UserTable users={users} loading={loading} error={error} />
+            <UserTable 
+              users={users} 
+              loading={loading} 
+              error={error} 
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </Paper>
 
           {/* Footer */}
@@ -162,6 +212,14 @@ function App() {
           </Box>
         </Container>
       </Box>
+
+      {/* User Form Dialog */}
+      <UserForm 
+        open={formOpen}
+        onClose={handleCloseForm}
+        user={editingUser}
+        onSave={handleSave}
+      />
     </ThemeProvider>
   )
 }

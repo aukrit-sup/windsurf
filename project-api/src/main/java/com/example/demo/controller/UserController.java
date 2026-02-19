@@ -1,34 +1,67 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.entity.User;
+import com.example.demo.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173, http://localhost:3000")
 public class UserController {
 
+    private final UserService userService;
+
     @GetMapping
-    public List<User> getAllUsers() {
-        User user1 = new User();
-        user1.setId(1L);
-        user1.setName("สมชาย ใจดี");
-        user1.setEmail("somchai@example.com");
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
 
-        User user2 = new User();
-        user2.setId(2L);
-        user2.setName("สมศรี รักดี");
-        user2.setEmail("somsri@example.com");
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        User user3 = new User();
-        user3.setId(3L);
-        user3.setName("วิชัย มั่นคง");
-        user3.setEmail("wichai@example.com");
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        try {
+            User createdUser = userService.createUser(user);
+            return ResponseEntity.ok(createdUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
-        return Arrays.asList(user1, user2, user3);
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        try {
+            User updatedUser = userService.updateUser(id, userDetails);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/email/{email}")
+    public ResponseEntity<Void> deleteUserByEmail(@PathVariable String email) {
+        userService.deleteUserByEmail(email);
+        return ResponseEntity.noContent().build();
     }
 }
